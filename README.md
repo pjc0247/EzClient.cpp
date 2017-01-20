@@ -16,7 +16,7 @@ client->on_leaveplayer = [](ez::LeavePlayer packet) {
 };
 ```
 
-``cpp
+```cpp
 while (true)
   client->dispatch();
 ```
