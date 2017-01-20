@@ -262,6 +262,12 @@ public:
 		packet.property = properties;
 		send_packet(packet.to_json().dump());
 	}
+	void send_packet(int packet_type, const ez::ezproperties &data) {
+		ez::RequestBroadcast packet;
+		packet.type = packet_type;
+		packet.data = data;
+		send_packet(packet.to_json().dump());
+	}
 
 private:
 	ezclient(std::string const &uri) {
