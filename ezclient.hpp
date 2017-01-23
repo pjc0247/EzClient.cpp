@@ -288,17 +288,28 @@ private:
         if (type == ez::WorldInfo::__type) {
             auto packet = ez::WorldInfo::from_json(jobj);
 
+			player = packet.player;
+			other_players = packet.other_players;
+
             if (on_worldinfo != nullptr)
                 on_worldinfo(packet);
         }
         else if (type == ez::JoinPlayer::__type) {
             auto packet = ez::JoinPlayer::from_json(jobj);
 
+			other_players.push_back(packet.player);
+
             if (on_joinplayer != nullptr)
                 on_joinplayer(packet);
         }
         else if (type == ez::LeavePlayer::__type) {
             auto packet = ez::LeavePlayer::from_json(jobj);
+
+			other_players.erase(
+				std::find_if(other_players.begin(), other_players.end(),
+				[&packet](ez::ezplayer &p) {
+					return p.player_id == packet.player.player_id;
+				}));
 
             if (on_leaveplayer != nullptr)
                 on_leaveplayer(packet);
@@ -328,6 +339,9 @@ public:
     std::function<void(ez::LeavePlayer)> on_leaveplayer;
     std::function<void(ez::ModifyPlayerProperty)> on_modifyplayerproperty;
     std::function<void(ez::BroadcastPacket)> on_custompacket;
+
+	ez::ezplayer player;
+	std::vector<ez::ezplayer> other_players;
 
 private:
     easywsclient::WebSocket *client;
