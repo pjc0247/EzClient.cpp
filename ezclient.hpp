@@ -183,6 +183,8 @@ namespace ez {
         ezproperties property;
         std::vector<std::string> removed_keys;
 
+        bool slient;
+
         virtual nlohmann::json to_json() const {
             nlohmann::json jobj;
 
@@ -190,6 +192,7 @@ namespace ez {
             jobj["Player"] = player.to_json();
             jobj["Property"] = property.to_json();
             jobj["RemovedKeys"] = removed_keys;
+            jobj["Slient"] = slient;
 
             return jobj;
         }
@@ -197,6 +200,7 @@ namespace ez {
         static ModifyPlayerProperty from_json(const nlohmann::json &json) {
             ModifyPlayerProperty packet;
 
+            packet.slient = (bool)json["Slient"];
             packet.player = ezplayer::from_json(json["Player"]);
             packet.property = ezproperties::from_json(json["Property"]);
             for (auto &key : json["RemovedKeys"])
@@ -288,8 +292,8 @@ private:
         if (type == ez::WorldInfo::__type) {
             auto packet = ez::WorldInfo::from_json(jobj);
 
-			player = packet.player;
-			other_players = packet.other_players;
+            player = packet.player;
+            other_players = packet.other_players;
 
             if (on_worldinfo != nullptr)
                 on_worldinfo(packet);
@@ -297,19 +301,19 @@ private:
         else if (type == ez::JoinPlayer::__type) {
             auto packet = ez::JoinPlayer::from_json(jobj);
 
-			other_players.push_back(packet.player);
+            other_players.push_back(packet.player);
 
             if (on_joinplayer != nullptr)
                 on_joinplayer(packet);
         }
         else if (type == ez::LeavePlayer::__type) {
             auto packet = ez::LeavePlayer::from_json(jobj);
-
-			other_players.erase(
-				std::find_if(other_players.begin(), other_players.end(),
-				[&packet](ez::ezplayer &p) {
-					return p.player_id == packet.player.player_id;
-				}));
+                
+            other_players.erase(
+                std::find_if(other_players.begin(), other_players.end(),
+                [&packet](ez::ezplayer &p) {
+                    return p.player_id == packet.player.player_id;
+                }));
 
             if (on_leaveplayer != nullptr)
                 on_leaveplayer(packet);
@@ -340,8 +344,8 @@ public:
     std::function<void(ez::ModifyPlayerProperty)> on_modifyplayerproperty;
     std::function<void(ez::BroadcastPacket)> on_custompacket;
 
-	ez::ezplayer player;
-	std::vector<ez::ezplayer> other_players;
+    ez::ezplayer player;
+    std::vector<ez::ezplayer> other_players;
 
 private:
     easywsclient::WebSocket *client;
